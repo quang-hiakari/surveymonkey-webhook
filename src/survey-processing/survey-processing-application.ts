@@ -1,13 +1,22 @@
 import { NextFunction } from 'express';
-import { TypedRequestBody, TypedResponse } from '../utils/types.ts';
+import { TypedRequestBody, TypedResponse } from '../utils/types';
+import { authenticateToSFCC } from '../utils/sfccAuth';
+import { Response } from 'express';
+import { SurveyRequestType } from './request/type';
+
 
 export const surveyProcessingApplication = async (
-  req: TypedRequestBody<CreateSubsidyApplicationRequest>,
-  res: TypedResponse<CreateSubsidyApplicationDto>,
+  req: TypedRequestBody<SurveyRequestType>,
+  res: Response,
   next: NextFunction
 ) => {
   try {
-    const surveyId: string = req.body.survey_id;
+    const {
+      SFCC_CLIENT_ID,
+      SFCC_CLIENT_SECRET
+    } = process.env;
+
+    const surveyId: string = req.body.resources.survey_id;
     if (!surveyId) {
       return res.status(400).json({ error: "survey_id is required" });
     }
@@ -46,7 +55,7 @@ export const surveyProcessingApplication = async (
     //   }
     // );
 
-    res.status(200).json({ message: "Success", updatedOrder: 'testing' });
+    res.status(200).json({ message: "Success", updatedOrder: accessToken });
   } catch (error: any) {
     next(error);
   }

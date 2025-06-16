@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
     "baseUrl": "./",
     "paths": {
       "*": ["node_modules/*"]

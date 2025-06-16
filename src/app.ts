@@ -3,10 +3,10 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
-import { errorHandler } from './common/middleware/error-handler-middleware.ts';
+import { errorHandler } from './common/middleware/error-handler-middleware';
 
 //import router
-import { router as surverProcessing } from './survey-processing/routes/index.ts';
+import { router as surverProcessing } from './survey-processing/routes/index';
 
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'local'}` });
