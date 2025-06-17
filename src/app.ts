@@ -8,7 +8,6 @@ import { errorHandler } from './common/middleware/error-handler-middleware';
 //import router
 import { router as surverProcessing } from './survey-processing/routes/index';
 
-
 dotenv.config({ path: `.env.${process.env.NODE_ENV || 'local'}` });
 
 //Config expess
@@ -23,7 +22,6 @@ app.set('port', process.env.PORT || 8080);
 
 //Subsidy Router
 app.use('/api/survey', surverProcessing);
-
 
 //Not in routes
 app.use(function (_req: Request, res: Response) {

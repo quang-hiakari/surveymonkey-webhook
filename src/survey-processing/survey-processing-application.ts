@@ -3,7 +3,7 @@ import { TypedRequestBody, TypedResponse } from '../utils/types';
 import { authenticateToSFCC } from '../utils/sfccAuth';
 import { Response } from 'express';
 import { SurveyRequestType } from './request/type';
-
+import axios from 'axios';
 
 export const surveyProcessingApplication = async (
   req: TypedRequestBody<SurveyRequestType>,
@@ -39,23 +39,30 @@ export const surveyProcessingApplication = async (
     const accessToken = await authenticateToSFCC(clientId, clientSecret);
 
     console.log(accessToken);
-    // // 3. Update Order in OCAPI
-    // const updateResponse = await axios.patch(
-    //   `${SFCC_OCAPI_BASE_URL}/orders/${SFCC_ORDER_ID}`,
-    //   {
-    //     custom: {
-    //       surveyTitle__c: surveyTitle,
-    //     },
-    //   },
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${accessToken}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // );
+    // 3. Update Order in OCAPI
+    const data = {
+      c_email: "nguyen.minhquang+1@f.flect.co.jp",
+      c_isProcessed: false
+    };
 
-    res.status(200).json({ message: "Success", updatedOrder: accessToken });
+    try {
+      const response = await axios.put(`${process.env.SFCC_OCAPI_BASE_URL}/012434587`, data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      res.status(200).json({
+        message: 'Update successful',
+        data: response.data
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        message: 'Error updating SFCC custom object',
+        error: error?.response?.data || error.message
+      });
+    }
   } catch (error: any) {
     next(error);
   }
