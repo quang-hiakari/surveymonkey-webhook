@@ -5,6 +5,8 @@ import { verifySurveyMonkeyKey } from '../../common/middleware/verify-key-middle
 export const router = Router();
 
 router.post('/survey-processing', verifySurveyMonkeyKey, surveyProcessingApplication);
+
+// HEAD router for SurveyMonkey verification when register new webhooks
 router.head('/survey-processing', (req, res) => {
   res.sendStatus(200);
 });
