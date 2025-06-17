@@ -8,7 +8,7 @@ export function verifySurveyMonkeyKey(req: Request, res: Response, next: NextFun
     : req.headers['sm-apikey'];
 
   if (!incomingApiKey || incomingApiKey !== expectedApiKey) {
-    return res.status(200).json({ error: 'Unauthorized webhook request' });
+    return res.status(403).json({ error: 'Unauthorized webhook request' });
   }
 
   next();

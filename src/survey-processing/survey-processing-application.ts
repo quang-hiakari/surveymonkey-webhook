@@ -53,7 +53,7 @@ export const surveyProcessingApplication = async (
       });
 
       res.status(200).json({
-        message: 'Update successful',
+        message: 'AnsweredQuestionaire registered successful',
         data: response.data
       });
     } catch (error: any) {
