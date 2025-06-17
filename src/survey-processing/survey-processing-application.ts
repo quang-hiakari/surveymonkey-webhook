@@ -38,7 +38,6 @@ export const surveyProcessingApplication = async (
     const clientSecret = SFCC_CLIENT_SECRET || '';
     const accessToken = await authenticateToSFCC(clientId, clientSecret);
 
-    console.log(accessToken);
     // 3. Update Order in OCAPI
     const data = {
       c_email: "nguyen.minhquang+1@f.flect.co.jp",
