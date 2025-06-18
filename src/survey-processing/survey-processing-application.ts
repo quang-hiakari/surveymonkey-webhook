@@ -17,7 +17,8 @@ export const surveyProcessingApplication = async (
     } = process.env;
 
     console.log(req.body);
-    const surveyId: string = req.body.resources.survey_id;
+    const surveyId = req.body.resources.survey_id;
+    const responseId = req.body.event_id;
     if (!surveyId) {
       return res.status(400).json({ error: "survey_id is required" });
     }
