@@ -15,7 +15,7 @@ export const surveyProcessingApplication = async (
       SFCC_CLIENT_ID,
       SFCC_CLIENT_SECRET
     } = process.env;
-
+    console.log("Webhook called");
     console.log(req.body);
     const surveyId = req.body.resources.survey_id;
     const responseId = req.body.event_id;
