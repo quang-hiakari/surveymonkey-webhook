@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 export function verifySurveyMonkeyKey(req: Request, res: Response, next: NextFunction) {
   const expectedApiKey = process.env.SURVERYMONKEY_CLIENT_ID || '';
 
-  console.log(req.header);
+  console.log(req.headers);
   const incomingApiKey = Array.isArray(req.headers['sm-apikey'])
     ? req.headers['sm-apikey'][0]
     : req.headers['sm-apikey'];
