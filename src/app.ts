@@ -16,7 +16,9 @@ const app: Express = express();
 //output request log
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.json());
+app.use(express.json({
+  type: ['application/json', 'application/vnd.surveymonkey.response.v1+json']
+}));
 app.use(cors());
 app.set('port', process.env.PORT || 8080);
 
