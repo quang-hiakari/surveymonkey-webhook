@@ -2,7 +2,7 @@ import { NextFunction } from 'express';
 import { TypedRequestBody, TypedResponse } from '../utils/types';
 import { authenticateToSFCC } from '../utils/sfccAuth';
 import { Response } from 'express';
-import { SurveyRequestType } from './request/type';
+import { SurveyRequestType } from './type/request';
 import axios from 'axios';
 
 export const surveyProcessingApplication = async (
@@ -16,6 +16,7 @@ export const surveyProcessingApplication = async (
       SFCC_CLIENT_SECRET
     } = process.env;
 
+    console.log(req.body);
     const surveyId: string = req.body.resources.survey_id;
     if (!surveyId) {
       return res.status(400).json({ error: "survey_id is required" });
