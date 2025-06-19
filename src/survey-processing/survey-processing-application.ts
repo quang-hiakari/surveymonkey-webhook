@@ -3,8 +3,8 @@ import { TypedRequestBody } from '../utils/types';
 import { getSFCCAccessToken } from '../utils/sfcc-token-manager';
 import { Response } from 'express';
 import { SurveyRequestType } from './type/request';
-import { getQuestionnaireResponseDetails } from './questionaire-response-handler';
-import { createCustomObjectIfNotExists } from './create-record-in-sfcc';
+import { getQuestionnaireResponseDetails } from './process/questionaire-response-handler';
+import { createCustomObjectIfNotExists } from './process/create-record-in-sfcc';
 
 export const surveyProcessingApplication = async (
   req: TypedRequestBody<SurveyRequestType>,
@@ -17,10 +17,10 @@ export const surveyProcessingApplication = async (
       SURVERYMONKEY_ORDER_QUESTION_ID = '',
       REWARD_POINT = 0
     } = process.env;
-    console.log("Webhook called");
-    console.log(req.body);
     const surveyId = req.body.resources.survey_id;
     const responseId = req.body.resources.respondent_id;
+    console.log("📥SurveyMonkey Webhook Started");
+    console.log(`📝Survey ID: ${surveyId}; Repondent Id: ${responseId}`);
 
     if (!surveyId) {
       return res.status(400).json({ error: "survey_id is required" });
@@ -29,8 +29,11 @@ export const surveyProcessingApplication = async (
       return res.status(400).json({ error: "respondent_id is required" });
     }
 
+    // 1. Get Questionaire Response data from SurveyMonkey
     // Call SurveryMonkeyAPI to get response details
     const answeredQuestions = await getQuestionnaireResponseDetails(surveyId, responseId);
+
+    console.log(`1) Get questionaire response details complete`);
 
     const answerMap = Object.fromEntries(
       answeredQuestions.map(a => [a.questionId, a.answerText || ""])
@@ -47,6 +50,7 @@ export const surveyProcessingApplication = async (
 
     // 2. Authenticate to SFCC
     const accessToken = await getSFCCAccessToken();
+    console.log(`2) Get accessToken for SFCC complete`);
 
     // 3. Create AnsweredQuestionaire record in CC via OCAPI
     const data = {
@@ -56,12 +60,16 @@ export const surveyProcessingApplication = async (
     };
 
     const result = await createCustomObjectIfNotExists(accessToken, orderNumber, data);
+    console.log(`✅ Survey processing completed`);
+    console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
+
     res.status(200).json({
       message: 'AnsweredQuestionaire registered successful',
       data: result.data ?? result.message
     });
 
   } catch (error: any) {
+    console.error(`❌ Error during survey processing.`);
     next(error);
   }
 };

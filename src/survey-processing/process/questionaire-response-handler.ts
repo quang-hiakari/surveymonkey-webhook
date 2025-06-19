@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SurveyResponse } from "./type/questionaire-detail-response";
+import { SurveyResponse } from "../type/questionaire-detail-response";
 
 interface SurveyAnswer {
   questionId: string;

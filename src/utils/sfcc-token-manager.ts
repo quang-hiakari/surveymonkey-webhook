@@ -9,7 +9,7 @@ let expiresAt: number = 0;
 export async function getSFCCAccessToken(): Promise<string> {
   const now = Date.now();
   if (cachedToken && now < expiresAt) {
-    console.log("SFCC access token exists. Keep using");
+    console.log("SFCC access token exists. Keep using current token");
     return cachedToken;
   }
 
