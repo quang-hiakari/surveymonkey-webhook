@@ -1,10 +1,10 @@
 import { NextFunction } from 'express';
-import { TypedRequestBody, TypedResponse } from '../utils/types';
-import { authenticateToSFCC } from '../utils/sfccAuth';
+import { TypedRequestBody } from '../utils/types';
+import { getSFCCAccessToken } from '../utils/sfcc-token-manager';
 import { Response } from 'express';
 import { SurveyRequestType } from './type/request';
-import axios from 'axios';
 import { getQuestionnaireResponseDetails } from './questionaire-response-handler';
+import { createCustomObjectIfNotExists } from './create-record-in-sfcc';
 
 export const surveyProcessingApplication = async (
   req: TypedRequestBody<SurveyRequestType>,
@@ -13,11 +13,9 @@ export const surveyProcessingApplication = async (
 ) => {
   try {
     const {
-      SFCC_CLIENT_ID,
-      SFCC_CLIENT_SECRET,
-      SURVERYMONKEY_EMAIL_QUESTION_ID,
-      SURVERYMONKEY_ORDER_QUESTION_ID,
-      REWARD_POINT
+      SURVERYMONKEY_EMAIL_QUESTION_ID = '',
+      SURVERYMONKEY_ORDER_QUESTION_ID = '',
+      REWARD_POINT = 0
     } = process.env;
     console.log("Webhook called");
     console.log(req.body);
@@ -39,44 +37,30 @@ export const surveyProcessingApplication = async (
     );
 
     // Get user's Email & OrderNumber from list answered question, base on questionId
-    const email = answerMap[SURVERYMONKEY_EMAIL_QUESTION_ID || ""];
-    const orderNumber = answerMap[SURVERYMONKEY_ORDER_QUESTION_ID || ""];
+    const email = answerMap[SURVERYMONKEY_EMAIL_QUESTION_ID];
+    const orderNumber = answerMap[SURVERYMONKEY_ORDER_QUESTION_ID];
 
     if (!email || !orderNumber) {
       return res.status(400).json({ error: "Missing email or order number in response" });
     }
+    console.log(`Extracted Email: ${email}, Order Number: ${orderNumber}`);
 
     // 2. Authenticate to SFCC
-    const clientId = SFCC_CLIENT_ID || '';
-    const clientSecret = SFCC_CLIENT_SECRET || '';
-    const accessToken = await authenticateToSFCC(clientId, clientSecret);
+    const accessToken = await getSFCCAccessToken();
 
-    // 3. Update Order in OCAPI
+    // 3. Create AnsweredQuestionaire record in CC via OCAPI
     const data = {
       c_email: email,
       c_isProcessed: false,
       c_rewardPoint:Number(REWARD_POINT)
     };
 
-    try {
-      const response = await axios.put(`${process.env.SFCC_OCAPI_BASE_URL}/${orderNumber}`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+    const result = await createCustomObjectIfNotExists(accessToken, orderNumber, data);
+    res.status(200).json({
+      message: 'AnsweredQuestionaire registered successful',
+      data: result.data ?? result.message
+    });
 
-      res.status(200).json({
-        message: 'AnsweredQuestionaire registered successful',
-        data: response.data
-      });
-    } catch (error: any) {
-      console.error(error?.response?.data || error.message);
-      res.status(500).json({
-        message: 'Error updating SFCC custom object',
-        error: error?.response?.data || error.message
-      });
-    }
   } catch (error: any) {
     next(error);
   }
