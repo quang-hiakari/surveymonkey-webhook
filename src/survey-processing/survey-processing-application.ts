@@ -1,6 +1,6 @@
 import { NextFunction } from 'express';
-import { TypedRequestBody } from '../utils/types';
-import { getSFCCAccessToken } from '../utils/sfcc-token-manager';
+import { TypedRequestBody } from '../common/utils/types';
+import { getSFCCAccessToken } from '../common/utils/sfcc-token-manager';
 import { Response } from 'express';
 import { SurveyRequestType } from './type/request';
 import { getQuestionnaireResponseDetails } from './process/questionaire-response-handler';
