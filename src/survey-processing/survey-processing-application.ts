@@ -4,6 +4,7 @@ import { authenticateToSFCC } from '../utils/sfccAuth';
 import { Response } from 'express';
 import { SurveyRequestType } from './type/request';
 import axios from 'axios';
+import { getQuestionnaireResponseDetails } from './questionaire-response-handler';
 
 export const surveyProcessingApplication = async (
   req: TypedRequestBody<SurveyRequestType>,
@@ -13,27 +14,37 @@ export const surveyProcessingApplication = async (
   try {
     const {
       SFCC_CLIENT_ID,
-      SFCC_CLIENT_SECRET
+      SFCC_CLIENT_SECRET,
+      SURVERYMONKEY_EMAIL_QUESTION_ID,
+      SURVERYMONKEY_ORDER_QUESTION_ID,
+      REWARD_POINT
     } = process.env;
     console.log("Webhook called");
     console.log(req.body);
     const surveyId = req.body.resources.survey_id;
-    const responseId = req.body.event_id;
+    const responseId = req.body.resources.respondent_id;
+
     if (!surveyId) {
       return res.status(400).json({ error: "survey_id is required" });
     }
+    if (!responseId) {
+      return res.status(400).json({ error: "respondent_id is required" });
+    }
 
-    // // 1. Get Survey Info
-    // const surveyResponse = await axios.get(
-    //   `https://api.surveymonkey.com/v3/surveys/${surveyId}/details`,
-    //   {
-    //     headers: {
-    //       Authorization: `Bearer ${SURVEYMONKEY_TOKEN}`,
-    //     },
-    //   }
-    // );
+    // Call SurveryMonkeyAPI to get response details
+    const answeredQuestions = await getQuestionnaireResponseDetails(surveyId, responseId);
 
-    // const surveyTitle: string = surveyResponse.data.title;
+    const answerMap = Object.fromEntries(
+      answeredQuestions.map(a => [a.questionId, a.answerText || ""])
+    );
+
+    // Get user's Email & OrderNumber from list answered question, base on questionId
+    const email = answerMap[SURVERYMONKEY_EMAIL_QUESTION_ID || ""];
+    const orderNumber = answerMap[SURVERYMONKEY_ORDER_QUESTION_ID || ""];
+
+    if (!email || !orderNumber) {
+      return res.status(400).json({ error: "Missing email or order number in response" });
+    }
 
     // 2. Authenticate to SFCC
     const clientId = SFCC_CLIENT_ID || '';
@@ -42,12 +53,13 @@ export const surveyProcessingApplication = async (
 
     // 3. Update Order in OCAPI
     const data = {
-      c_email: "nguyen.minhquang+1@f.flect.co.jp",
-      c_isProcessed: false
+      c_email: email,
+      c_isProcessed: false,
+      c_rewardPoint: REWARD_POINT
     };
 
     try {
-      const response = await axios.put(`${process.env.SFCC_OCAPI_BASE_URL}/012434587`, data, {
+      const response = await axios.put(`${process.env.SFCC_OCAPI_BASE_URL}/${orderNumber}`, data, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json'

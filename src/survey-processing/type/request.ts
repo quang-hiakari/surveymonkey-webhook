@@ -7,10 +7,10 @@ export interface SurveyRequestType {
     object_type: 'response' | string;
     object_id: string;
     event_datetime: string;
-  
     resources: {
       collector_id: string;
       survey_id: string;
       user_id: string;
+      respondent_id: string;
     };
   };
