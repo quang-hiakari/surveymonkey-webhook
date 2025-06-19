@@ -53,6 +53,7 @@ export const surveyProcessingApplication = async (
     console.log(`2) Get accessToken for SFCC complete`);
 
     // 3. Create AnsweredQuestionaire record in CC via OCAPI
+    console.log(`3) Create record in SFCC via OCAPI`);
     const data = {
       c_email: email,
       c_isProcessed: false,
@@ -60,6 +61,7 @@ export const surveyProcessingApplication = async (
     };
 
     const result = await createCustomObjectIfNotExists(accessToken, orderNumber, data);
+    console.log(result);
     console.log(`✅ Survey processing completed`);
     console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
 

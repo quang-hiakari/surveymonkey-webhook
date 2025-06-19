@@ -9,7 +9,7 @@ let expiresAt: number = 0;
 export async function getSFCCAccessToken(): Promise<string> {
   const now = Date.now();
   if (cachedToken && now < expiresAt) {
-    console.log("SFCC access token exists. Keep using current token");
+    console.log("2-1)SFCC access token exists. Keep using current token");
     return cachedToken;
   }
 
@@ -35,7 +35,7 @@ export async function getSFCCAccessToken(): Promise<string> {
     cachedToken = access_token;
     expiresAt = now + (expires_in - 60) * 1000; // refresh 1 min early
 
-    console.log("SFCC access token fetched and cached");
+    console.log("2-2) SFCC access token fetched and cached");
     return cachedToken!;
   } catch (error: any) {
     console.error('Failed to authenticate with SFCC:', error.response?.data || error.message);
