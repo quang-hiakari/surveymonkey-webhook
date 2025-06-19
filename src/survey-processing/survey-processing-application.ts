@@ -55,7 +55,7 @@ export const surveyProcessingApplication = async (
     const data = {
       c_email: email,
       c_isProcessed: false,
-      c_rewardPoint: REWARD_POINT
+      c_rewardPoint:Number(REWARD_POINT)
     };
 
     try {
@@ -71,6 +71,7 @@ export const surveyProcessingApplication = async (
         data: response.data
       });
     } catch (error: any) {
+      console.error(error?.response?.data || error.message);
       res.status(500).json({
         message: 'Error updating SFCC custom object',
         error: error?.response?.data || error.message
